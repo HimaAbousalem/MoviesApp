@@ -20,6 +20,7 @@ import java.util.List;
 public class GridViewFragment extends Fragment {
     public  List<Movie> moviesList;
     GridView gridView;
+    FetchMovieTask fetchMovieTask;
     public GridViewFragment() {
     }
     @Override
@@ -32,7 +33,7 @@ public class GridViewFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
+        fetchData();
         }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -40,12 +41,12 @@ public class GridViewFragment extends Fragment {
 
       View rootView = inflater.inflate(R.layout.fragment_main, container, false);
          gridView = (GridView) rootView.findViewById(R.id.postersgridView);
-        fetchData();
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener(
+         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener(
 
         ) {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                moviesList = fetchMovieTask.getData();
                 Intent intent = new Intent(getActivity(), DetailedActivity.class);
                 intent.putExtra("moviePoster", moviesList.get(position).getMoviePoster());
                 intent.putExtra("movieTitle", moviesList.get(position).getTitle());
@@ -76,9 +77,10 @@ public class GridViewFragment extends Fragment {
                   .appendQueryParameter(API_KEY, BuildConfig.Movie_App_API_KEY)
                   .build();
       }
-      FetchMovieTask fetchMovieTask= new FetchMovieTask(builtUri,gridView,getActivity(),"movie");
+
+      fetchMovieTask= new FetchMovieTask(builtUri,gridView,getActivity(),"movie");
       fetchMovieTask.execute();
-      moviesList=fetchMovieTask.getData();
+
   }
 
 }
