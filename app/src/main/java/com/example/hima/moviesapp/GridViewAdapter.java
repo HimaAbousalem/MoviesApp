@@ -34,7 +34,7 @@ public class GridViewAdapter extends ArrayAdapter<Movie> {
         ImageView image;
         if(row == null){
             LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-            row = inflater.inflate(layoutResourceId, parent, false);
+            row = inflater.inflate(layoutResourceId,parent, false);
             image= (ImageView)row.findViewById(R.id.movieImage);
             row.setTag(image);
         }
