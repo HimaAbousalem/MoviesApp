@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.GridView;
+import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,17 +25,43 @@ import java.util.List;
  */
 class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
     private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
-    private List<Movie> data;
+    private static List<Movie> data;
     private Uri builtUri;
     private Context mContext;
-    private String determineJSONFunction;
+    private String determineJSONFunction=null;
     private GridView gridView;
+    private ListView listTrailers;
+    private String [] trailes;
     public FetchMovieTask(Uri builtUri,GridView gridView,Context mContext,String determineJSONFunction){
         this.builtUri=builtUri;
         this.gridView=gridView;
         this.mContext=mContext;
         this.determineJSONFunction=determineJSONFunction;
     }
+    public FetchMovieTask(Uri builtUri,ListView listTrailers,Context mContext,String determineJSONFunction){
+        this.builtUri=builtUri;
+        this.listTrailers=listTrailers;
+        this.mContext=mContext;
+        this.determineJSONFunction=determineJSONFunction;
+    }
+
+    public List<Movie> getMovieTrailerFromJson(String MovieJsonStr)
+            throws JSONException{
+        final String WEB_RESULT = "results";
+        JSONObject initial = new JSONObject(MovieJsonStr);
+        JSONArray moviesArray = initial.getJSONArray(WEB_RESULT);
+        if(moviesArray==null){
+            return null;
+        }
+        else{
+            for(int i=0;i<moviesArray.length();i++){
+                JSONObject movieDetail = moviesArray.getJSONObject(i);
+                data.get(i).setTrailers(movieDetail.getString("key"));
+            }
+        }
+        return data;
+    }
+
     public List<Movie> getMovieDataFromJson(String MovieJsonStr)
             throws JSONException {
         data = new ArrayList<Movie>();
@@ -105,8 +132,12 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
             }
         }
         try {
-
-                    return getMovieDataFromJson(MovieJsonStr);
+               if (determineJSONFunction.equals("movie")) {
+                   return getMovieDataFromJson(MovieJsonStr);
+               }
+            else if(determineJSONFunction.equals("trailer")){
+                   return getMovieTrailerFromJson(MovieJsonStr);
+               }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -114,10 +145,15 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
     }
     @Override
     protected void onPostExecute(List<Movie> result){
-
+        if (determineJSONFunction.equals("movie")) {
             gridView.setAdapter(new GridViewAdapter(mContext, R.layout.gridview_item, result));
+        }
+        else if(determineJSONFunction.equals("trailer")){
 
+        }
+        else if(determineJSONFunction.equals("review")){
 
+        }
     }
    public List<Movie> getData(){return data;}
 

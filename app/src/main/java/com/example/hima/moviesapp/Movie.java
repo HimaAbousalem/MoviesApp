@@ -1,16 +1,25 @@
 package com.example.hima.moviesapp;
 
+import java.util.ArrayList;
+
 /**
  * Created by Hima on 3/25/2016.
  */
 public class Movie {
    private String  title, release_data, moviePoster, voteAverage, plotSynopsis, iD, reviews;
-   private String[] trailers;
+   private ArrayList<String> trailers;
+
+    public Movie(){
+        trailers = new ArrayList<String>();
+      }
     public void setTitle(String title){
         this.title=title;
     }
     public void setRelease_data(String release_data){
-        this.release_data=release_data;
+        if(release_data.length()>4) {
+            release_data = release_data.substring(0, 4);
+        }
+        this.release_data =release_data;
     }
     public void setMoviePoster(String moviePoster){
         String MOVIES_BASE_URL= "http://image.tmdb.org/t/p/w185/";
@@ -28,8 +37,9 @@ public class Movie {
     public void setReviews(String Reviews){
         this.reviews=Reviews;
     }
-    public void setTrailers(String[] Trailers){
-        this.trailers= Trailers;
+    //  Movie Trailers !
+    public void setTrailers(String Trailers){
+      trailers.add("https://www.youtube.com/watch?v="+Trailers);
     }
 
     public String getTitle(){
@@ -53,7 +63,7 @@ public class Movie {
     public String getReviews(){
         return reviews;
     }
-    public String[] getTrailers(){
+    public ArrayList<String> getTrailers(){
         return trailers;
     }
 

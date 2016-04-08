@@ -54,6 +54,7 @@ public class GridViewFragment extends Fragment {
                 intent.putExtra("moviePlot", moviesList.get(position).getPlotSynopsis());
                 intent.putExtra("movieVote", moviesList.get(position).getVoteAverage());
                 intent.putExtra("movieID", moviesList.get(position).getiD());
+                intent.putExtra("position",position);
                 startActivity(intent);
             }
         });
@@ -67,7 +68,7 @@ public class GridViewFragment extends Fragment {
       final String FETCH_MOVIE_popular_BASE_URL = "http://api.themoviedb.org/3/movie/popular?";
       final String API_KEY = "api_key";
 
-      if (sortingmethod.equals("popularity")) {
+      if (sortingmethod.equals("popular")) {
           builtUri = Uri.parse(FETCH_MOVIE_popular_BASE_URL).buildUpon()
                   .appendQueryParameter(API_KEY, BuildConfig.Movie_App_API_KEY)
                   .build();
