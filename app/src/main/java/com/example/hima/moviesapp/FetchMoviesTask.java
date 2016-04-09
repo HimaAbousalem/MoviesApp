@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
 
@@ -25,24 +26,26 @@ import java.util.List;
  */
 class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
     private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
-    private static List<Movie> data;
+    private  static List<Movie> data;
     private Uri builtUri;
     private Context mContext;
     private String determineJSONFunction=null;
     private GridView gridView;
+    private   ArrayAdapter<String> adapter;
     private ListView listTrailers;
-    private String [] trailes;
+    int index;
     public FetchMovieTask(Uri builtUri,GridView gridView,Context mContext,String determineJSONFunction){
         this.builtUri=builtUri;
         this.gridView=gridView;
         this.mContext=mContext;
         this.determineJSONFunction=determineJSONFunction;
     }
-    public FetchMovieTask(Uri builtUri,ListView listTrailers,Context mContext,String determineJSONFunction){
+    public FetchMovieTask(Uri builtUri,ListView listTrailers,Context mContext,String determineJSONFunction,int index){
         this.builtUri=builtUri;
         this.listTrailers=listTrailers;
         this.mContext=mContext;
         this.determineJSONFunction=determineJSONFunction;
+        this.index= index;
     }
 
     public List<Movie> getMovieTrailerFromJson(String MovieJsonStr)
@@ -56,7 +59,7 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
         else{
             for(int i=0;i<moviesArray.length();i++){
                 JSONObject movieDetail = moviesArray.getJSONObject(i);
-                data.get(i).setTrailers(movieDetail.getString("key"));
+                data.get(index).setTrailers(movieDetail.getString("key"));
             }
         }
         return data;
@@ -149,7 +152,8 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
             gridView.setAdapter(new GridViewAdapter(mContext, R.layout.gridview_item, result));
         }
         else if(determineJSONFunction.equals("trailer")){
-
+           adapter= new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, data.get(index).getTrailers());
+            listTrailers.setAdapter(adapter);
         }
         else if(determineJSONFunction.equals("review")){
 

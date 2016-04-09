@@ -7,7 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,10 +23,10 @@ public class DetailedActivityFragment extends Fragment {
     public String id;
     FetchMovieTask fetchMovieTask;
     Uri builtUri;
-    String[] trailersLinks;
     List<Movie> data;
-    ArrayAdapter<String> adapter;
     ListView list;
+    int index;
+
     public DetailedActivityFragment() {
     }
 
@@ -59,11 +59,17 @@ public class DetailedActivityFragment extends Fragment {
         String Release = intent.getStringExtra("movieRelease");
         release.setText(Release);
         id = intent.getStringExtra("movieID");
-        getTrailer();
         list = (ListView)rootView.findViewById(R.id.list_trailers);
-       // data = fetchMovieTask.getData();
-        //  trailersLinks= data.getTrailers();
-
+         index =  intent.getIntExtra("position",-1);
+        getTrailer();
+        data=fetchMovieTask.getData();
+         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+             @Override
+             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //         String uri =list.get(position);
+                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=nIGtF3J5kn8")));
+             }
+         });
         return rootView;
     }
     private void getTrailer() {
@@ -74,7 +80,7 @@ public class DetailedActivityFragment extends Fragment {
                 .appendPath("videos")
                 .appendQueryParameter(API_KEY, BuildConfig.Movie_App_API_KEY)
                 .build();
-        fetchMovieTask = new FetchMovieTask(builtUri, list, getActivity(), "trailer");
+        fetchMovieTask = new FetchMovieTask(builtUri, list, getActivity(), "trailer",index);
         fetchMovieTask.execute();
     }
 }

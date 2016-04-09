@@ -1,13 +1,14 @@
 package com.example.hima.moviesapp;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Hima on 3/25/2016.
  */
 public class Movie {
    private String  title, release_data, moviePoster, voteAverage, plotSynopsis, iD, reviews;
-   private ArrayList<String> trailers;
+   private List<String> trailers;
 
     public Movie(){
         trailers = new ArrayList<String>();
@@ -63,7 +64,7 @@ public class Movie {
     public String getReviews(){
         return reviews;
     }
-    public ArrayList<String> getTrailers(){
+    public List<String> getTrailers(){
         return trailers;
     }
 

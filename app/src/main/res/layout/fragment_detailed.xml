@@ -13,7 +13,7 @@
         android:paddingBottom="20dp"
         android:paddingLeft="16dp"
         android:paddingRight="8dp"
-        android:paddingTop="20dp"
+        android:paddingTop="16dp"
         android:text="Test"
         android:textStyle="bold|italic"
         android:textSize="23sp"/>
@@ -92,14 +92,15 @@
                 android:id="@+id/trailers_text_view"
                 android:textStyle="bold"
                 android:layout_marginTop="8dp"
+                android:paddingLeft="16dp"
+                android:layout_marginBottom="8dp"/>
+            <ListView
+                android:id="@+id/list_trailers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:paddingLeft="16dp"/>
    </LinearLayout>
     </ScrollView>
-    <ListView
-        android:id="@+id/list_trailers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/scrollView"
-        android:layout_marginTop="16dp"
-        android:paddingLeft="16dp"/>
+
 </RelativeLayout>
