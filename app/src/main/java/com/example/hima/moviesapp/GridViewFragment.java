@@ -48,13 +48,7 @@ public class GridViewFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 moviesList = fetchMovieTask.getData();
                 Intent intent = new Intent(getActivity(), DetailedActivity.class);
-                intent.putExtra("moviePoster", moviesList.get(position).getMoviePoster());
-                intent.putExtra("movieTitle", moviesList.get(position).getTitle());
-                intent.putExtra("movieRelease", moviesList.get(position).getRelease_data());
-                intent.putExtra("moviePlot", moviesList.get(position).getPlotSynopsis());
-                intent.putExtra("movieVote", moviesList.get(position).getVoteAverage());
-                intent.putExtra("movieID", moviesList.get(position).getiD());
-                intent.putExtra("position",position);
+                intent.putExtra("movie",moviesList.get(position));
                 startActivity(intent);
             }
         });

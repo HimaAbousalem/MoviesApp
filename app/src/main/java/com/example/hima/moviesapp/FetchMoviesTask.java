@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
 
@@ -31,7 +30,6 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
     private Context mContext;
     private String determineJSONFunction=null;
     private GridView gridView;
-    private   ArrayAdapter<String> adapter;
     private ListView listTrailers;
     int index;
     public FetchMovieTask(Uri builtUri,GridView gridView,Context mContext,String determineJSONFunction){
@@ -59,7 +57,7 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
         else{
             for(int i=0;i<moviesArray.length();i++){
                 JSONObject movieDetail = moviesArray.getJSONObject(i);
-                data.get(index).setTrailers(movieDetail.getString("key"));
+             //   data.get(index).setTrailers(movieDetail.getString("key"));
             }
         }
         return data;
@@ -152,8 +150,8 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
             gridView.setAdapter(new GridViewAdapter(mContext, R.layout.gridview_item, result));
         }
         else if(determineJSONFunction.equals("trailer")){
-           adapter= new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, data.get(index).getTrailers());
-            listTrailers.setAdapter(adapter);
+       //    adapter= new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, data.get(index).getTrailers());
+        //    listTrailers.setAdapter(adapter);
         }
         else if(determineJSONFunction.equals("review")){
 

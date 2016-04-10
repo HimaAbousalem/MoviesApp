@@ -1,18 +1,39 @@
 package com.example.hima.moviesapp;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by Hima on 3/25/2016.
  */
-public class Movie {
-   private String  title, release_data, moviePoster, voteAverage, plotSynopsis, iD, reviews;
-   private List<String> trailers;
+public class Movie implements Parcelable {
+   private String  title, release_data, moviePoster, voteAverage, plotSynopsis, iD;
 
     public Movie(){
-        trailers = new ArrayList<String>();
+
       }
+
+    protected Movie(Parcel in) {
+        title = in.readString();
+        release_data = in.readString();
+        moviePoster = in.readString();
+        voteAverage = in.readString();
+        plotSynopsis = in.readString();
+        iD = in.readString();
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
     public void setTitle(String title){
         this.title=title;
     }
@@ -35,13 +56,8 @@ public class Movie {
     public void setPlotSynopsis(String plotSynopsis){
         this.plotSynopsis= plotSynopsis;
     }
-    public void setReviews(String Reviews){
-        this.reviews=Reviews;
-    }
-    //  Movie Trailers !
-    public void setTrailers(String Trailers){
-      trailers.add("https://www.youtube.com/watch?v="+Trailers);
-    }
+
+
 
     public String getTitle(){
         return title;
@@ -61,11 +77,19 @@ public class Movie {
     public String getiD(){
         return iD;
     }
-    public String getReviews(){
-        return reviews;
-    }
-    public List<String> getTrailers(){
-        return trailers;
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeString(release_data);
+        dest.writeString(moviePoster);
+        dest.writeString(voteAverage);
+        dest.writeString(plotSynopsis);
+        dest.writeString(iD);
+    }
 }

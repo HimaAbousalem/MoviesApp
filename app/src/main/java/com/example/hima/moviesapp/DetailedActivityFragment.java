@@ -40,33 +40,27 @@ public class DetailedActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detailed, container, false);
-        Intent intent = getActivity().getIntent();
 
         TextView title = (TextView) rootView.findViewById(R.id.movie_title);
         TextView vote = (TextView) rootView.findViewById(R.id.movie_vote_average);
         TextView release = (TextView) rootView.findViewById(R.id.movie_release_date);
         TextView review = (TextView) rootView.findViewById(R.id.movie_overview);
         ImageView poster = (ImageView) rootView.findViewById(R.id.movie_poster);
-
-        String image = intent.getStringExtra("moviePoster");
-        Picasso.with(getContext()).load(image).into(poster);
-        String Title = intent.getStringExtra("movieTitle");
-        title.setText(Title);
-        String voteString = intent.getStringExtra("movieVote");
-        vote.setText(voteString);
-        String Review = intent.getStringExtra("moviePlot");
-        review.setText(Review);
-        String Release = intent.getStringExtra("movieRelease");
-        release.setText(Release);
-        id = intent.getStringExtra("movieID");
+        Intent i = getActivity().getIntent();
+        Movie myMovieObject = (Movie) i.getParcelableExtra("movie");
+        Picasso.with(getContext()).load(myMovieObject.getMoviePoster()).into(poster);
+        title.setText(myMovieObject.getTitle());
+        vote.setText(myMovieObject.getVoteAverage());
+        review.setText(myMovieObject.getPlotSynopsis());
+        release.setText(myMovieObject.getRelease_data());
         list = (ListView)rootView.findViewById(R.id.list_trailers);
-         index =  intent.getIntExtra("position",-1);
+
         getTrailer();
         data=fetchMovieTask.getData();
          list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
              @Override
+             //         String uri =list.get(position);
              public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //         String uri =list.get(position);
                  startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=nIGtF3J5kn8")));
              }
          });
