@@ -11,7 +11,7 @@ public class Trailers {
 
     public Trailers(String id, String key, String name) {
         this.id = id;
-        this.key = key;
+        this.key ="https://www.youtube.com/watch?v="+ key;
         this.name = name;
     }
 
@@ -20,7 +20,7 @@ public class Trailers {
     }
 
     public void setKey(String key){
-        this.key=key;
+        this.key="https://www.youtube.com/watch?v="+key;
     }
 
     public void setName(String name){
