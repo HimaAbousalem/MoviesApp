@@ -1,16 +1,13 @@
 package com.example.hima.moviesapp;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -27,31 +24,21 @@ import java.util.ArrayList;
 
 
 
-public class Review extends Fragment {
-     String id;
+public class Review extends AppCompatActivity {
+    String id;
     String finalres;
     TextView rev;
 
-    public Review() {
-
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-         View rootView =inflater.inflate(R.layout.fragment_review, container, false);
-        Intent intent =getActivity().getIntent();
+        setContentView(R.layout.activity_review);
+        Intent intent =this.getIntent();
         id = intent.getStringExtra("id");
-        rev= (TextView) rootView.findViewById(R.id.reviewview_id);
+        rev= (TextView) findViewById(R.id.reviewview_id);
         FetchReview fetchMovieTask = new FetchReview();
         fetchMovieTask.execute();
-        return rootView;
     }
 
 
@@ -140,7 +127,7 @@ public class Review extends Fragment {
         @Override
         protected void onPostExecute(Integer result){
             if (finalres == null || finalres.equals("")) {
-                if (isNetworkAvailable(getContext())) finalres = "No Reviews found!Try later";
+                if (isNetworkAvailable(getApplicationContext())) finalres = "No Reviews found!Try later";
                 else finalres = "Check connection & Try again";
             }
             rev.setText(finalres);

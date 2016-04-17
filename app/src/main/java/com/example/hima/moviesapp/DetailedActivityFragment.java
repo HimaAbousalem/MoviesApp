@@ -37,6 +37,7 @@ import java.util.List;
 public class DetailedActivityFragment extends Fragment implements View.OnClickListener {
     public String id;
     public ListView list;
+    Movie myMovieObject;
     private  List<Trailers> data;
     FetchTrailer fetch;
     Button rev;
@@ -58,14 +59,14 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
         list = (ListView)rootView.findViewById(R.id.list_trailers);
         list = (ListView) rootView.findViewById(R.id.list_trailers);
         list.addHeaderView(header);
-         rev = (Button) rootView.findViewById(R.id.reviews);
+        rev = (Button) rootView.findViewById(R.id.reviews);
         TextView title = (TextView) rootView.findViewById(R.id.movie_title);
         TextView vote = (TextView) rootView.findViewById(R.id.movie_vote_average);
         TextView release = (TextView) rootView.findViewById(R.id.movie_release_date);
         TextView review = (TextView) rootView.findViewById(R.id.movie_overview);
         ImageView poster = (ImageView) rootView.findViewById(R.id.movie_poster);
         Intent i = getActivity().getIntent();
-        Movie myMovieObject = (Movie) i.getParcelableExtra("movie");
+        myMovieObject = (Movie) i.getParcelableExtra("movie");
         Picasso.with(getContext()).load(myMovieObject.getMoviePoster()).into(poster);
         title.setText(myMovieObject.getTitle());
         vote.setText(myMovieObject.getVoteAverage());
@@ -75,7 +76,7 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
         rev.setOnClickListener(this);
         fetch= new FetchTrailer();
         fetch.execute();
-         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
              @Override
              public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                  startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(data.get(position).getKey())));

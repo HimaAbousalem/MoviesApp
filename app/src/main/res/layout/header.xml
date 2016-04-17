@@ -61,12 +61,19 @@
                         android:layout_marginTop="10dp"
                         android:text="Test 3"
                         android:textSize="20sp" />
-
+                    <Button
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:text="Add to favorite"
+                        android:id="@+id/favor_id"
+                        android:background="?attr/colorPrimary"
+                        android:textColor="#ffffff" />
                     <Button
                         android:id="@+id/reviews"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_width="100dp"                        android:layout_height="wrap_content"
+                        android:background="?attr/colorPrimary"
+                        android:textColor="#ffffff"
+                        android:layout_marginTop="20dp"
                         android:text="Reviews" />
                 </LinearLayout>
 
