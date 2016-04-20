@@ -36,6 +36,9 @@ import java.util.List;
 public class GridViewFragment extends Fragment {
     private  List<Movie> data;
     GridView gridView;
+    private GridViewAdapter mGridAdapter;
+    SharedPreferences sharedPreferences;
+    String sortingmethod;
     public GridViewFragment() {
     }
 
@@ -49,7 +52,13 @@ public class GridViewFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        new FetchMovieTask().execute();
+        which_pref();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        which_pref();
     }
 
     @Override
@@ -58,6 +67,7 @@ public class GridViewFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.postersgridView);
+
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener(
 
         ) {
@@ -70,7 +80,20 @@ public class GridViewFragment extends Fragment {
         });
         return rootView;
     }
-    public boolean isNetworkAvailable(final Context context) {
+    public void which_pref(){
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sortingmethod = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
+        if(sortingmethod.equals("favourite")){
+            MovieDBHelper db = new MovieDBHelper(getActivity());
+            data= db.getAllMovie();
+            gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.gridview_item, data));
+        }
+        else{
+            new FetchMovieTask().execute();
+        }
+    }
+
+  public boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
@@ -111,9 +134,6 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
         Uri builtUri;
 
         try {
-
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String sortingmethod = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
             final String FETCH_MOVIE_TOP_RATED_BASE_URL = "http://api.themoviedb.org/3/movie/top_rated?";
             final String FETCH_MOVIE_popular_BASE_URL = "http://api.themoviedb.org/3/movie/popular?";
             final String API_KEY = "api_key";

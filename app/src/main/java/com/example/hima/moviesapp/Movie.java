@@ -8,9 +8,10 @@ import android.os.Parcelable;
  */
 public class Movie implements Parcelable {
    private String  title, release_data, moviePoster, voteAverage, plotSynopsis, iD;
+    public boolean insertedToDB;
 
     public Movie(){
-
+            insertedToDB=false;
       }
 
     protected Movie(Parcel in) {

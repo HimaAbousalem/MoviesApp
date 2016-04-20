@@ -1,9 +1,13 @@
 package com.example.hima.moviesapp;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +19,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -41,6 +46,11 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
     private  List<Trailers> data;
     FetchTrailer fetch;
     Button rev;
+    Button favourite ;
+    String sortingmethod;
+    MovieDBHelper DB;
+    boolean insert =false;
+    SharedPreferences sharedPreferences;
     public DetailedActivityFragment() {
     }
 
@@ -59,12 +69,18 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
         list = (ListView)rootView.findViewById(R.id.list_trailers);
         list = (ListView) rootView.findViewById(R.id.list_trailers);
         list.addHeaderView(header);
+
         rev = (Button) rootView.findViewById(R.id.reviews);
         TextView title = (TextView) rootView.findViewById(R.id.movie_title);
         TextView vote = (TextView) rootView.findViewById(R.id.movie_vote_average);
         TextView release = (TextView) rootView.findViewById(R.id.movie_release_date);
         TextView review = (TextView) rootView.findViewById(R.id.movie_overview);
         ImageView poster = (ImageView) rootView.findViewById(R.id.movie_poster);
+        favourite = (Button) rootView.findViewById(R.id.favor_id);
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sortingmethod = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
+
         Intent i = getActivity().getIntent();
         myMovieObject = (Movie) i.getParcelableExtra("movie");
         Picasso.with(getContext()).load(myMovieObject.getMoviePoster()).into(poster);
@@ -73,8 +89,10 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
         review.setText(myMovieObject.getPlotSynopsis());
         release.setText(myMovieObject.getRelease_data());
         id= myMovieObject.getiD();
+
         rev.setOnClickListener(this);
-        fetch= new FetchTrailer();
+        favourite.setOnClickListener(this);
+        fetch=new FetchTrailer();
         fetch.execute();
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
              @Override
@@ -86,12 +104,37 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
         return rootView;
     }
 
+
     @Override
     public void onClick(View v) {
-        Intent intent = new Intent(getActivity(), Review.class);
-        intent.putExtra("id",id);
-        startActivity(intent);
+        if(v.getId() == R.id.favor_id) {
+            if(myMovieObject.insertedToDB==false) {
+                DB = new MovieDBHelper(getActivity());
+                DB.insertMovie(myMovieObject);
+                Toast.makeText(getActivity(), "Added to Favourite List", Toast.LENGTH_SHORT).show();
+                favourite.setText("Remove From Favourite");
+                myMovieObject.insertedToDB=true;
+            }
+            else {
+                DB = new MovieDBHelper(getActivity());
+                DB.deleteMovie(myMovieObject.getiD());
+                Toast.makeText(getActivity(), "Removed from Favourite List", Toast.LENGTH_SHORT).show();
+                favourite.setText("Add to favorite");
+                myMovieObject.insertedToDB=false;
+            }
+        }
+        else if (v.getId()==R.id.reviews){
+         Intent intent = new Intent(getActivity(), Review.class);
+         intent.putExtra("id", id);
+         startActivity(intent);
+        }
     }
+
+    public boolean isNetworkAvailable(final Context context) {
+        final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+    }
+
 
     class FetchTrailer extends AsyncTask<String, Void, List<Trailers> > {
        private final String LOG_TAG = FetchTrailer.class.getSimpleName();
@@ -180,9 +223,14 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
            return null;
        }
        @Override
-       protected void onPostExecute(List<Trailers> result){
-           adapter= new ArrayAdapter<Trailers>(getActivity(), android.R.layout.simple_list_item_1,result);
-           list.setAdapter(adapter);
+       protected void onPostExecute(List<Trailers> result) {
+           if (isNetworkAvailable(getContext())) {
+               adapter = new ArrayAdapter<Trailers>(getActivity(), android.R.layout.simple_list_item_1, result);
+               list.setAdapter(adapter);
+           }
+           else {
+               Toast.makeText(getActivity(), "Check connection & Try again", Toast.LENGTH_SHORT).show();
+           }
        }
 
    }

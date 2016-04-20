@@ -2,8 +2,11 @@ package com.example.hima.moviesapp;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.ArrayList;
 
 /**
  * Created by Hima on 4/17/2016.
@@ -33,6 +36,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + MovieContract.MovieEntry.TABLE_NAME);
         onCreate(db);
     }
+
     public  void insertMovie(Movie movie){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
@@ -42,7 +46,32 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         contentValues.put(MovieContract.MovieEntry.MOVIE_VOTE,movie.getVoteAverage());
         contentValues.put(MovieContract.MovieEntry.MOVIE_OVERVIEW,movie.getPlotSynopsis());
         contentValues.put(MovieContract.MovieEntry.MOVIE_POSTER,movie.getMoviePoster());
-        db.insert(MovieContract.MovieEntry.TABLE_NAME,null,contentValues);
+        db.insert(MovieContract.MovieEntry.TABLE_NAME, null, contentValues);
+        db.close();
+    }
+    public ArrayList<Movie> getAllMovie(){
+        ArrayList<Movie> movies= new ArrayList<Movie>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from "+ MovieContract.MovieEntry.TABLE_NAME,null);
+       if(cursor.moveToFirst()) {
+           do {
+                Movie m= new Movie();
+               m.setiD(cursor.getString(0));
+               m.setTitle(cursor.getString(1));
+               m.setRelease_data(cursor.getString(2));
+               m.setVoteAverage(cursor.getString(3));
+               m.setPlotSynopsis(cursor.getString(4));
+               m.setMoviePoster(cursor.getString(5));
+               movies.add(m);
+           } while(cursor.moveToNext());
+         }
+        db.close();
+
+        return movies;
+    }
+    public void deleteMovie(String ID){
+        SQLiteDatabase db= this.getWritableDatabase();
+        db.delete(MovieContract.MovieEntry.TABLE_NAME, MovieContract.MovieEntry._ID+" =?",new String[]{ID});
         db.close();
     }
 

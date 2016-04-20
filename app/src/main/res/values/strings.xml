@@ -5,7 +5,7 @@
     <string name="sort_by_option_menu">Sort By</string>
     <string name="sort_type">Sort</string>
     <string name="setting_menu">SettingActivity</string>
-    <string name="pref_default_value">popularity.desc</string>
+    <string name="pref_default_value">popular</string>
     <string-array name="sort_type">
         <item>Most Popular</item>
         <item>Highest Rate</item>
@@ -14,7 +14,7 @@
     <string-array name="sort_type_values">
         <item>popular</item>
         <item>top_rated</item>
-        <item>Favourite</item>
+        <item>favourite</item>
     </string-array>
 
     <string name="trailers_text_view">Trailers</string>
