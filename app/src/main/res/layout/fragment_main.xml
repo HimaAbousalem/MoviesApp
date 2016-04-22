@@ -6,13 +6,13 @@
     tools:context=".MainActivityFragment">
 
     <GridView
+        android:id="@+id/postersgridView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:columnWidth="150dp"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
-        android:id="@+id/postersgridView"
+        android:gravity="center"
         />
-
-
 </RelativeLayout>
 

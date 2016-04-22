@@ -1,7 +1,6 @@
 package com.example.hima.moviesapp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -39,6 +38,9 @@ public class GridViewFragment extends Fragment {
     private GridViewAdapter mGridAdapter;
     SharedPreferences sharedPreferences;
     String sortingmethod;
+    iSecondaryFrag secondaryFrag;
+    int mPostion=GridView.INVALID_POSITION;
+    private static final String SELECTED_KEY = "selected_position";
     public GridViewFragment() {
     }
 
@@ -47,12 +49,6 @@ public class GridViewFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        which_pref();
     }
 
     @Override
@@ -73,24 +69,45 @@ public class GridViewFragment extends Fragment {
         ) {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), DetailedActivity.class);
-                intent.putExtra("movie", data.get(position));
-                startActivity(intent);
+                Movie m = data.get(position);
+                mPostion = position;
+                secondaryFrag.transferData(m);
+
             }
         });
+        which_pref();
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            mPostion = savedInstanceState.getInt(SELECTED_KEY);
+        }
         return rootView;
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (mPostion != GridView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPostion);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
     public void which_pref(){
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         sortingmethod = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
         if(sortingmethod.equals("favourite")){
             MovieDBHelper db = new MovieDBHelper(getActivity());
             data= db.getAllMovie();
-            gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.gridview_item, data));
+            gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.grid_item_posters, data));
+            if (mPostion != GridView.INVALID_POSITION) {
+                gridView.setSelection(mPostion);
+            }
         }
         else{
             new FetchMovieTask().execute();
         }
+    }
+
+    public void setSecondaryFrag(iSecondaryFrag secondaryFrag) {
+        this.secondaryFrag = secondaryFrag;
     }
 
   public boolean isNetworkAvailable(final Context context) {
@@ -117,7 +134,7 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
                 movie.setMoviePoster(movieDetail.getString("poster_path"));
                 movie.setTitle(movieDetail.getString("title"));
                 movie.setRelease_data(movieDetail.getString("release_date"));
-                movie.setVoteAverage(movieDetail.getString("vote_average"));
+                movie.setVoteAverage(movieDetail.getString("vote_average")+"/10");
                 movie.setPlotSynopsis(movieDetail.getString("overview"));
                 movie.setiD(movieDetail.getString("id"));
                 data.add(movie);
@@ -196,7 +213,7 @@ class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
     @Override
     protected void onPostExecute(List<Movie> result){
         if(result!=null) {
-            gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.gridview_item, result));
+            gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.grid_item_posters, result));
         }
         else {
             if (isNetworkAvailable(getActivity()))

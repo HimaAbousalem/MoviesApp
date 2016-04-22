@@ -69,11 +69,10 @@ public class MovieDBHelper extends SQLiteOpenHelper {
 
         return movies;
     }
+
     public void deleteMovie(String ID){
         SQLiteDatabase db= this.getWritableDatabase();
         db.delete(MovieContract.MovieEntry.TABLE_NAME, MovieContract.MovieEntry._ID+" =?",new String[]{ID});
         db.close();
     }
-
-
 }

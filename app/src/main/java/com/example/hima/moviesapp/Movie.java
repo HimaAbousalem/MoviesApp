@@ -70,7 +70,7 @@ public class Movie implements Parcelable {
         return moviePoster;
     }
     public String getVoteAverage(){
-        return voteAverage+"/10";
+        return voteAverage;
     }
     public String getPlotSynopsis(){
         return plotSynopsis;

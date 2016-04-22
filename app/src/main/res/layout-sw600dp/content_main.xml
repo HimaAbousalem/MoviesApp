@@ -7,24 +7,25 @@
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.ayman.pop.MainActivity">
+    tools:context="com.example.mohamed.myapplication3.MainActivity">
 
     <!--
     This layout is a two-pane layout for the Items master/detail flow.
     -->
 
     <fragment
-        android:id="@+id/fragment"
+        android:id="@+id/fragment1"
         android:name="com.example.hima.moviesapp.GridViewFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2"
+        android:layout_weight="0.4"
         tools:layout="@android:layout/activity_list_item" />
 
-    <FrameLayout
+    <fragment
         android:id="@+id/detail_container"
+        android:name="com.example.hima.moviesapp.DetailedActivityFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="4" />
+        android:layout_weight="0.6" />
 
 </LinearLayout>

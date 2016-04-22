@@ -16,6 +16,13 @@ public class DetailedActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Bundle extras = getIntent().getExtras();
+        if (null == savedInstanceState) {
+            DetailedActivityFragment mDetailsFragment = new DetailedActivityFragment();
+            //Pass the "extras" Bundle that contains the selected "name" to the fragment
+            mDetailsFragment.setArguments(extras);
+            getSupportFragmentManager().beginTransaction().add(R.id.detail_container, mDetailsFragment).commit();
+        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -50,15 +50,20 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
     String sortingmethod;
     MovieDBHelper DB;
     boolean insert =false;
+    TextView title,vote,release,review ;
+    ImageView poster;
     SharedPreferences sharedPreferences;
     public DetailedActivityFragment() {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-      }
+    public void onResume() {
+        super.onResume();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sortingmethod = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
+        if(sortingmethod.equals("favourite"))
+            favourite.setText("Remove From Favourite");
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -67,33 +72,20 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
         View rootView = inflater.inflate(R.layout.fragment_detailed, container, false);
         View header = inflater.inflate(R.layout.header, null, false);
         list = (ListView)rootView.findViewById(R.id.list_trailers);
-        list = (ListView) rootView.findViewById(R.id.list_trailers);
         list.addHeaderView(header);
 
         rev = (Button) rootView.findViewById(R.id.reviews);
-        TextView title = (TextView) rootView.findViewById(R.id.movie_title);
-        TextView vote = (TextView) rootView.findViewById(R.id.movie_vote_average);
-        TextView release = (TextView) rootView.findViewById(R.id.movie_release_date);
-        TextView review = (TextView) rootView.findViewById(R.id.movie_overview);
-        ImageView poster = (ImageView) rootView.findViewById(R.id.movie_poster);
+        title = (TextView) rootView.findViewById(R.id.movie_title);
+        vote = (TextView) rootView.findViewById(R.id.movie_vote_average);
+        release = (TextView) rootView.findViewById(R.id.movie_release_date);
+        review = (TextView) rootView.findViewById(R.id.movie_overview);
+        poster = (ImageView) rootView.findViewById(R.id.movie_poster);
         favourite = (Button) rootView.findViewById(R.id.favor_id);
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        sortingmethod = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
-
-        Intent i = getActivity().getIntent();
-        myMovieObject = (Movie) i.getParcelableExtra("movie");
-        Picasso.with(getContext()).load(myMovieObject.getMoviePoster()).into(poster);
-        title.setText(myMovieObject.getTitle());
-        vote.setText(myMovieObject.getVoteAverage());
-        review.setText(myMovieObject.getPlotSynopsis());
-        release.setText(myMovieObject.getRelease_data());
-        id= myMovieObject.getiD();
-
+        UpdateData(getMovieObject());
         rev.setOnClickListener(this);
         favourite.setOnClickListener(this);
-        fetch=new FetchTrailer();
-        fetch.execute();
+
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
              @Override
              public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -108,18 +100,17 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.favor_id) {
-            if(myMovieObject.insertedToDB==false) {
+            if(favourite.getText().toString().equals("Add to favorite")) {
                 DB = new MovieDBHelper(getActivity());
                 DB.insertMovie(myMovieObject);
                 Toast.makeText(getActivity(), "Added to Favourite List", Toast.LENGTH_SHORT).show();
-                favourite.setText("Remove From Favourite");
-                myMovieObject.insertedToDB=true;
-            }
+               }
             else {
+                favourite.setText("Remove From Favourite");
                 DB = new MovieDBHelper(getActivity());
                 DB.deleteMovie(myMovieObject.getiD());
+
                 Toast.makeText(getActivity(), "Removed from Favourite List", Toast.LENGTH_SHORT).show();
-                favourite.setText("Add to favorite");
                 myMovieObject.insertedToDB=false;
             }
         }
@@ -130,6 +121,26 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
         }
     }
 
+    public Movie getMovieObject(){
+        if(getArguments()!=null&&getArguments().getParcelable("movie")!=null) {
+            myMovieObject = getArguments().getParcelable("movie");
+        }
+        return myMovieObject;
+    }
+
+    public void UpdateData(Movie movie){
+        myMovieObject = movie;
+        if(myMovieObject!=null) {
+            Picasso.with(getContext()).load(myMovieObject.getMoviePoster()).into(poster);
+            title.setText(myMovieObject.getTitle());
+            vote.setText(myMovieObject.getVoteAverage());
+            review.setText(myMovieObject.getPlotSynopsis());
+            release.setText(myMovieObject.getRelease_data());
+            id = myMovieObject.getiD();
+            fetch = new FetchTrailer();
+            fetch.execute();
+        }
+  }
     public boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
@@ -225,11 +236,12 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
        @Override
        protected void onPostExecute(List<Trailers> result) {
            if (isNetworkAvailable(getContext())) {
-               adapter = new ArrayAdapter<Trailers>(getActivity(), android.R.layout.simple_list_item_1, result);
+               adapter = new ArrayAdapter<Trailers>(getActivity(), R.layout.trailer_list_item,R.id.trailers_text_view, result);
                list.setAdapter(adapter);
            }
            else {
-               Toast.makeText(getActivity(), "Check connection & Try again", Toast.LENGTH_SHORT).show();
+               adapter = new ArrayAdapter<Trailers>(getActivity(),  R.layout.trailer_list_item,R.id.trailers_text_view, data);
+               list.setAdapter(adapter);
            }
        }
 

@@ -28,18 +28,13 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.hima.moviesapp.MainActivity" />
+                android:value=".MainActivity" />
         </activity>
-        <activity
-            android:name=".SettingActivity"
-            android:label="@string/setting_menu"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.hima.moviesapp.MainActivity" />
+        <activity android:name=".Review"
+            android:theme="@style/Theme.AppCompat.Dialog">
+
         </activity>
-        <activity android:name=".Review"></activity>
+        <activity android:name=".SettingActivity"></activity>
     </application>
 
 </manifest>

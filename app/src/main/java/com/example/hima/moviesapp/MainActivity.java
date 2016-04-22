@@ -7,7 +7,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements iSecondaryFrag {
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,7 +16,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (findViewById(R.id.detail_container) != null) {
+            mTwoPane = true;
+        } else {
+            mTwoPane = false;
+        }
+//      if(mTwoPane){
+          GridViewFragment gv = (GridViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment1);
+          gv.setSecondaryFrag(this);
+//      }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -25,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
@@ -34,5 +44,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void transferData(Movie movie) {
+      if(mTwoPane){
+//          Bundle args = new Bundle();
+//          args.putParcelable("movie",movie);
+
+//          DetailedActivityFragment fragment2 = new DetailedActivityFragment();
+//          fragment2.setArguments(args);
+//          getSupportFragmentManager().beginTransaction()
+//                  .replace(R.id.detail_container, fragment2).commit();
+          DetailedActivityFragment detailedActivityFragment = (DetailedActivityFragment) getSupportFragmentManager().findFragmentById(R.id.detail_container);
+          detailedActivityFragment.UpdateData(movie);
+      }
+      else{
+        Intent intent = new Intent(this, DetailedActivity.class);
+        intent.putExtra("movie", movie);
+        startActivity(intent);
+      }
     }
 }
