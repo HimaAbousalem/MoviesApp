@@ -49,7 +49,6 @@ public class DetailedActivityFragment extends Fragment implements View.OnClickLi
     Button favourite ;
     String sortingmethod;
     MovieDBHelper DB;
-    boolean insert =false;
     TextView title,vote,release,review ;
     ImageView poster;
     SharedPreferences sharedPreferences;

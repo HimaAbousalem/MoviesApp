@@ -2,6 +2,7 @@ package com.example.hima.moviesapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -37,10 +38,11 @@ public class GridViewFragment extends Fragment {
     GridView gridView;
     private GridViewAdapter mGridAdapter;
     SharedPreferences sharedPreferences;
-    String sortingmethod;
+    String sortingmethod,oldPref,newPref,old2Pref,new2Pref;
     iSecondaryFrag secondaryFrag;
-    int mPostion=GridView.INVALID_POSITION;
+    int mPostion = GridView.INVALID_POSITION;
     private static final String SELECTED_KEY = "selected_position";
+    boolean check;
     public GridViewFragment() {
     }
 
@@ -49,12 +51,22 @@ public class GridViewFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        if(savedInstanceState!=null){
+            check=true;
+        }
+
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        //  sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        // new2Pref = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
+        //if(!old2Pref.equals(new2Pref)){
         which_pref();
+        //   old2Pref=new2Pref;
+        // }
     }
 
     @Override
@@ -75,10 +87,22 @@ public class GridViewFragment extends Fragment {
 
             }
         });
-        which_pref();
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
             mPostion = savedInstanceState.getInt(SELECTED_KEY);
+            check=true;
         }
+        if(isTablet(getActivity())) {
+            if (data!= null) {
+                Movie m = data.get(0);
+                gridView.setSelection(0);
+                secondaryFrag.transferData(m);
+            }
+        }
+        // which_pref();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        old2Pref = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        oldPref = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
         return rootView;
     }
 
@@ -95,11 +119,30 @@ public class GridViewFragment extends Fragment {
         sortingmethod = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
         if(sortingmethod.equals("favourite")){
             MovieDBHelper db = new MovieDBHelper(getActivity());
-            data= db.getAllMovie();
-            gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.grid_item_posters, data));
-            if (mPostion != GridView.INVALID_POSITION) {
-                gridView.setSelection(mPostion);
+            try {
+                data = db.getAllMovie();
+                gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.grid_item_posters, data));
+            }catch (Exception e){
+                Toast.makeText(getActivity(), "No Favorites", Toast.LENGTH_SHORT).show();
             }
+            if (mPostion != GridView.INVALID_POSITION&&sortingmethod.equals(oldPref)) {
+                gridView.setSelection(mPostion);
+                if (isTablet(getActivity())) {
+                    secondaryFrag.transferData(data.get(mPostion));
+                }
+            }
+            else if (data!= null){
+                try {
+                    Movie m = data.get(0);
+                    gridView.setSelection(0);
+                    if (isTablet(getActivity())) {
+                        secondaryFrag.transferData(m);
+                    }
+                }catch (Exception e){
+                    Toast.makeText(getActivity(),"No Favourite",Toast.LENGTH_LONG);
+                }
+            }
+
         }
         else{
             new FetchMovieTask().execute();
@@ -110,120 +153,146 @@ public class GridViewFragment extends Fragment {
         this.secondaryFrag = secondaryFrag;
     }
 
-  public boolean isNetworkAvailable(final Context context) {
+    public boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
-class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
-    private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
 
-
-    public List<Movie> getMovieDataFromJson(String MovieJsonStr)
-            throws JSONException {
-        data = new ArrayList<Movie>();
-        final String WEB_RESULT = "results";
-        JSONObject initial = new JSONObject(MovieJsonStr);
-        JSONArray moviesArray = initial.getJSONArray(WEB_RESULT);
-        if(moviesArray==null){
-            return null;
-        }
-        else{
-            for(int i=0;i<moviesArray.length();i++){
-                JSONObject movieDetail = moviesArray.getJSONObject(i);
-                Movie movie = new Movie();
-                movie.setMoviePoster(movieDetail.getString("poster_path"));
-                movie.setTitle(movieDetail.getString("title"));
-                movie.setRelease_data(movieDetail.getString("release_date"));
-                movie.setVoteAverage(movieDetail.getString("vote_average")+"/10");
-                movie.setPlotSynopsis(movieDetail.getString("overview"));
-                movie.setiD(movieDetail.getString("id"));
-                data.add(movie);
-            }
-        }
-        return data;
+    public static boolean isTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
-    @Override
-    protected List<Movie> doInBackground(String... params) {
 
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-        String MovieJsonStr = null;
-        Uri builtUri;
+    class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
+        private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
 
-        try {
-            final String FETCH_MOVIE_TOP_RATED_BASE_URL = "http://api.themoviedb.org/3/movie/top_rated?";
-            final String FETCH_MOVIE_popular_BASE_URL = "http://api.themoviedb.org/3/movie/popular?";
-            final String API_KEY = "api_key";
 
-            if (sortingmethod.equals("popular")) {
-                builtUri = Uri.parse(FETCH_MOVIE_popular_BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY, BuildConfig.Movie_App_API_KEY)
-                        .build();
-            }
-            else{
-                builtUri = Uri.parse(FETCH_MOVIE_TOP_RATED_BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY, BuildConfig.Movie_App_API_KEY)
-                        .build();
-            }
-            URL url = new URL(builtUri.toString());
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
-
-            if (inputStream == null) {
-                Log.d(LOG_TAG, "input stream is null");
+        public List<Movie> getMovieDataFromJson(String MovieJsonStr)
+                throws JSONException {
+            data = new ArrayList<Movie>();
+            final String WEB_RESULT = "results";
+            JSONObject initial = new JSONObject(MovieJsonStr);
+            JSONArray moviesArray = initial.getJSONArray(WEB_RESULT);
+            if (moviesArray == null) {
                 return null;
-            }
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line + "\n");
-            }
-            if (buffer.length() == 0){
-                return null;
-            }
-            MovieJsonStr = buffer.toString();
-        }catch(IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
-            return null;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    Log.e(LOG_TAG, "Error closing stream", e);
+            } else {
+                for (int i = 0; i < moviesArray.length(); i++) {
+                    JSONObject movieDetail = moviesArray.getJSONObject(i);
+                    Movie movie = new Movie();
+                    movie.setMoviePoster(movieDetail.getString("poster_path"));
+                    movie.setTitle(movieDetail.getString("title"));
+                    movie.setRelease_data(movieDetail.getString("release_date"));
+                    movie.setVoteAverage(movieDetail.getString("vote_average") + "/10");
+                    movie.setPlotSynopsis(movieDetail.getString("overview"));
+                    movie.setiD(movieDetail.getString("id"));
+                    data.add(movie);
                 }
             }
+            return data;
         }
-        try {
-            return getMovieDataFromJson(MovieJsonStr);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+        @Override
+        protected List<Movie> doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String MovieJsonStr = null;
+            Uri builtUri;
+
+            try {
+                final String FETCH_MOVIE_TOP_RATED_BASE_URL = "http://api.themoviedb.org/3/movie/top_rated?";
+                final String FETCH_MOVIE_popular_BASE_URL = "http://api.themoviedb.org/3/movie/popular?";
+                final String API_KEY = "api_key";
+
+                if (sortingmethod.equals("popular")) {
+                    builtUri = Uri.parse(FETCH_MOVIE_popular_BASE_URL).buildUpon()
+                            .appendQueryParameter(API_KEY, BuildConfig.Movie_App_API_KEY)
+                            .build();
+                } else {
+                    builtUri = Uri.parse(FETCH_MOVIE_TOP_RATED_BASE_URL).buildUpon()
+                            .appendQueryParameter(API_KEY, BuildConfig.Movie_App_API_KEY)
+                            .build();
+                }
+                URL url = new URL(builtUri.toString());
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+
+                if (inputStream == null) {
+                    Log.d(LOG_TAG, "input stream is null");
+                    return null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line + "\n");
+                }
+                if (buffer.length() == 0) {
+                    return null;
+                }
+                MovieJsonStr = buffer.toString();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error ", e);
+                return null;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+            try {
+                return getMovieDataFromJson(MovieJsonStr);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
-        return null;
+
+        @Override
+        protected void onPostExecute(List<Movie> result) {
+            if (result != null) {
+                gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.grid_item_posters, result));
+                sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                newPref = sharedPreferences.getString(getString(R.string.sort_type), getString(R.string.pref_default_value));
+                if (data!= null) {
+                    Movie m = data.get(0);
+                    gridView.setSelection(0);
+                    if(isTablet(getActivity())) {
+                        secondaryFrag.transferData(m);
+                    }
+                }
+            }
+            else {
+                if (isNetworkAvailable(getActivity()))
+                    Toast.makeText(getActivity(), "Failed to fetch data! Try again", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(getActivity(), "Failed to fetch data! Check connection", Toast.LENGTH_SHORT).show();
+            }
+            if (mPostion != GridView.INVALID_POSITION&&oldPref.equals(newPref)) {
+                gridView.setSelection(mPostion);
+                if(isTablet(getActivity())) {
+                    secondaryFrag.transferData(data.get(mPostion));
+                }
+            }else  if (!oldPref.equals(newPref)) {
+                gridView.setSelection(0);
+                if (isTablet(getActivity())) {
+                    secondaryFrag.transferData(data.get(0));
+                }
+                oldPref = newPref;
+            }
+
+        }
     }
-    @Override
-    protected void onPostExecute(List<Movie> result){
-        if(result!=null) {
-            gridView.setAdapter(new GridViewAdapter(getActivity(), R.layout.grid_item_posters, result));
-        }
-        else {
-            if (isNetworkAvailable(getActivity()))
-                Toast.makeText(getActivity(), "Failed to fetch data! Try again", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(getActivity(), "Failed to fetch data! Check connection", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-}
-
 }
