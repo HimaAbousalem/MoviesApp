@@ -23,20 +23,19 @@ import java.net.URL;
 import java.util.ArrayList;
 
 
-
 public class Review extends AppCompatActivity {
     String id;
-    String finalres;
-    TextView rev;
+    String finalReview;
+    TextView reviewTextView;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_review);
-        Intent intent =this.getIntent();
+        Intent intent = this.getIntent();
         id = intent.getStringExtra("id");
-        rev= (TextView) findViewById(R.id.reviewview_id);
+        reviewTextView = (TextView) findViewById(R.id.reviewview_id);
         FetchReview fetchMovieTask = new FetchReview();
         fetchMovieTask.execute();
     }
@@ -46,25 +45,28 @@ public class Review extends AppCompatActivity {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
-    class FetchReview extends AsyncTask<String, Void,Integer> {
+
+    class FetchReview extends AsyncTask<String, Void, Integer> {
         private final String LOG_TAG = FetchReview.class.getSimpleName();
 
 
         public Integer getReviewFromJson(String MovieJsonStr)
                 throws JSONException {
-            ArrayList<String> arr = new ArrayList<>();
+            ArrayList<String> arrRev = new ArrayList<>();
             JSONObject jsonRootObject = new JSONObject(MovieJsonStr);
             JSONArray jsonArray = jsonRootObject.optJSONArray("results");
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                arr.add("Written by: " + jsonObject.optString("author") + "\n" + jsonObject.optString("content"));
+                arrRev.add("Written by: " + jsonObject.getString("author") + "\n" + jsonObject.getString("content"));
             }
-            return parseResultrev(arr);
+            return parseResultrev(arrRev);
         }
+
 
         @Override
         protected Integer doInBackground(String... params) {
+
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -97,11 +99,11 @@ public class Review extends AppCompatActivity {
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line + "\n");
                 }
-                if (buffer.length() == 0){
+                if (buffer.length() == 0) {
                     return null;
                 }
                 MovieJsonStr = buffer.toString();
-            }catch(IOException e) {
+            } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 return null;
             } finally {
@@ -124,23 +126,26 @@ public class Review extends AppCompatActivity {
             }
             return null;
         }
+
         @Override
-        protected void onPostExecute(Integer result){
-            if (finalres == null || finalres.equals("")) {
-                if (isNetworkAvailable(getApplicationContext())) finalres = "No Reviews found!Try later";
-                else finalres = "Check connection & Try again";
+        protected void onPostExecute(Integer result) {
+            if (finalReview == null || finalReview.equals("")) {
+                if (isNetworkAvailable(getApplicationContext()))
+                    finalReview = "No Reviews found, Try later";
+                else finalReview = "Check connection";
             }
-            rev.setText(finalres);
+            reviewTextView.setText(finalReview);
         }
 
     }
+
     private int parseResultrev(ArrayList<String> arr) {
 
         StringBuilder storage = new StringBuilder();
         for (int i = 0; i < arr.size(); i++) {
             storage.append(arr.get(i) + "\n\n-------------------------------------------------\n\n");
         }
-        finalres = storage.toString();
+        finalReview = storage.toString();
         return arr.size();
     }
 }
